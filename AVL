@@ -1,0 +1,334 @@
+#include <iostream>
+#include <malloc.h>
+using namespace std;
+
+struct cliente {
+    char nombre[60];
+    int tipo;
+    int turno;
+    cliente* siguiente;
+};
+
+struct viaje {
+    int dia;
+    int year;
+    int mes;
+    int precio;
+    char destino[60];
+    int matricula_embar;
+    char nombre_embar[60];
+    int fecha;
+    int capacidad_embar;
+    viaje* izq;
+    viaje* der;
+    int altura;
+    string resultado;
+    int i;
+    cliente* primerp; // Apunta a la cabeza del primer pasajero
+};
+
+struct viaje *raiz, *aux ,*Viaje;
+
+int obtenerAltura(struct viaje* n) {
+    if (n == NULL) {
+        return 0;
+    }
+    return n->altura;
+}
+
+int mayor(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+int obtenerBalance(struct viaje* n) {
+    if (n == NULL) {
+        return 0;
+    }
+    return obtenerAltura(n->izq) - obtenerAltura(n->der);
+}
+
+struct viaje* rotarDerecha(struct viaje* y) {
+    struct viaje* x = y->izq;
+    struct viaje* T2 = x->der;
+
+    x->der = y;
+    y->izq = T2;
+
+    y->altura = mayor(obtenerAltura(y->izq), obtenerAltura(y->der)) + 1;
+    x->altura = mayor(obtenerAltura(x->izq), obtenerAltura(x->der)) + 1;
+
+    return x;
+}
+
+struct viaje* rotarIzquierda(struct viaje* x) {
+    struct viaje* y = x->der;
+    struct viaje* T2 = y->izq;
+
+    y->izq = x;
+    x->der = T2;
+
+    x->altura = mayor(obtenerAltura(x->izq), obtenerAltura(x->der)) + 1;
+    y->altura = mayor(obtenerAltura(y->izq), obtenerAltura(y->der)) + 1;
+
+    return y;
+}
+
+struct viaje* insertar(struct viaje* nodo, struct viaje* aux) {
+    if (nodo == NULL) {
+        return aux;
+    }
+
+    if (aux->i < nodo->i) {
+        nodo->izq = insertar(nodo->izq, aux);
+    } else if (aux->i > nodo->i) {
+        nodo->der = insertar(nodo->der, aux);
+    } else {
+        return nodo;
+    }
+
+    nodo->altura = 1 + mayor(obtenerAltura(nodo->izq), obtenerAltura(nodo->der));
+
+    int balance = obtenerBalance(nodo);
+
+    if (balance > 1 && aux->i < nodo->izq->i) {
+        return rotarDerecha(nodo);
+    }
+
+    if (balance < -1 && aux->i > nodo->der->i) {
+        return rotarIzquierda(nodo);
+    }
+
+    if (balance > 1 && aux->i > nodo->izq->i) {
+        nodo->izq = rotarIzquierda(nodo->izq);
+        return rotarDerecha(nodo);
+    }
+
+    if (balance < -1 && aux->i < nodo->der->i) {
+        nodo->der = rotarDerecha(nodo->der);
+        return rotarIzquierda(nodo);
+    }
+
+    return nodo;
+}
+
+int crearNodo() {
+    aux = (struct viaje*)malloc(sizeof(struct viaje));
+
+    cout << "Matricula de embarcacion " << endl;
+    cin >> aux->matricula_embar;
+    cout << "Nombre de embarcacion " << endl;
+    cin >> aux->nombre_embar;
+    cout << "Destino de embarcacion " << endl;
+    cin >> aux->destino;
+    cout << "Precio de embarcacion " << endl;
+    cin >> aux->precio;
+    cout << "Capacidad de embarcacion " << endl;
+    cin >> aux->capacidad_embar;
+    cout << "Ingrese la fecha en formato AAAAMMDD" << endl;
+    cin >> aux->fecha;
+    aux->year = aux->fecha / 10000;
+    aux->mes = (aux->fecha / 100) % 100;
+    aux->dia = aux->fecha % 100;
+    cout << "Fecha ingresada: " << aux->dia << "/" << aux->mes << "/" << aux->year << endl;
+    aux->resultado = to_string(aux->matricula_embar) + to_string(aux->fecha); // concatenar
+    cout << "Identificador " << aux->resultado << endl;
+    aux->i = atoi(aux->resultado.c_str());
+
+    aux->izq = NULL;
+    aux->der = NULL;
+    aux->altura = 1;
+
+    raiz = insertar(raiz, aux);
+
+    return 0;
+}
+
+void preOrden(struct viaje* nodo) {
+    if (nodo != NULL) {
+        cout << nodo->nombre_embar << " ";
+        cout << nodo->destino << "";
+        preOrden(nodo->izq);
+        preOrden(nodo->der);
+    }
+}
+
+int ubicar(viaje* recursive, int aguja) {
+    if (recursive->i == aguja) {
+        aux = recursive;
+        return 1;
+    } else {
+        if (recursive->izq != NULL) {
+            ubicar(recursive->izq, aguja);
+        }
+        if (recursive->der != NULL) {
+            ubicar(recursive->der, aguja);
+        }
+    }
+    if (recursive->fecha == aguja) {
+        aux = recursive;
+        return 1;
+    } else {
+        if (recursive->izq != NULL) {
+            ubicar(recursive->izq, aguja);
+        }
+        if (recursive->der != NULL) {
+            ubicar(recursive->der, aguja);
+        }
+    }
+    return 0;
+}
+
+int buscar_viaje() {
+    int id;
+    cout << "Digite el identificador de viaje " << endl;
+    cin >> id;
+    ubicar(raiz, id);
+    if (aux == NULL) {
+        cout << "El dato a buscar no se encuentra " << endl;
+    } else {
+        cout << "El dato encontrado " << endl;
+    }
+
+    return 0;
+}
+
+
+    int inorden (viaje *recursive){
+
+if (recursive->izq!=NULL){
+inorden(recursive->izq);
+}
+cout<< " LISTA  "<<recursive->i<<endl;
+ if (recursive->der!=NULL)
+{
+ inorden(recursive->der);  
+}
+return 0;
+};
+
+
+
+int eliminar_viaje() {
+    return 0;
+}
+
+cliente* auxiliar = NULL;
+cliente* auxiliar2 = NULL;
+
+int registrar_pasajero() {
+    int opc = 0;
+    int id;
+    cout << "Ingrese el id de viaje" << endl;
+    cin >> id;
+
+    ubicar(raiz, id); // Ubicar el viaje correspondiente
+
+    if (aux == NULL) {
+        cout << "Viaje no encontrado." << endl;
+        return 0;
+    }
+
+    if (!aux->primerp) {
+        aux->primerp = (struct cliente*)malloc(sizeof(struct cliente));
+        cout << "REGISTRO DE PASAJERO" << endl;
+        cout << "Ingrese su nombre: " << endl;
+        cin >> aux->primerp->nombre;
+
+        aux->primerp->siguiente = NULL;
+    } else {
+        auxiliar = aux->primerp;
+        while (auxiliar->siguiente != NULL) {
+            auxiliar = auxiliar->siguiente;
+        }
+
+        auxiliar2 = (struct cliente*)malloc(sizeof(struct cliente));
+        cout << "Ingrese su nombre: " << endl;
+        cin >> auxiliar2->nombre;
+
+        auxiliar2->siguiente = NULL;
+        auxiliar->siguiente = auxiliar2;
+        auxiliar = auxiliar2 = NULL;
+        free(auxiliar);
+        free(auxiliar2);
+    }
+    return 0;
+}
+
+int listar_pasajero() {
+    if (!aux) {
+        cout << "No se ha seleccionado un viaje." << endl;
+        return 0;
+    }
+
+    for (auxiliar = aux->primerp; auxiliar != NULL; auxiliar = auxiliar->siguiente) {
+        cout << "----------------------------------------" << endl;
+        cout << "Lista de pasajeros" << endl;
+        cout << "Nombre: " << auxiliar->nombre << endl;
+    }
+
+    free(auxiliar);
+
+    return 0;
+}
+
+void mostrar(viaje* arbol, int con) {
+    if (arbol == NULL) {
+        cout << "Error: arbol vacio" << endl;
+    } else {
+        if (arbol->der != NULL) {
+            mostrar(arbol->der, con + 1);
+        }
+
+        for (int i = 0; i < con * 4; i++) {
+            cout << " ";
+        }
+        cout << arbol->resultado << endl;
+
+        if (arbol->izq != NULL) {
+            mostrar(arbol->izq, con + 1);
+        }
+    }
+}
+
+int main() {
+    int opc = 0;
+    do {
+        cout << "Menu de opciones" << endl;
+        cout << "1. Registrar un nuevo viaje" << endl;
+        cout << "2. Buscar" << endl;
+        cout << "3. Lista de todos los viajes" << endl;
+        cout << "4. Eliminar" << endl;
+        cout << "5.Registrar un pasajero en un viaje" << endl;
+        cout << "6. lista de todos los pasajeros de un viaje" << endl;
+        cout << "7. Mostrar arbol" << endl;
+        cout << "8. Salir" << endl;
+        cin >> opc;
+
+        switch (opc) {
+            case 1:
+                crearNodo();
+                break;
+            case 2:
+                buscar_viaje();
+                break;
+            case 3:
+             inorden (raiz);
+                break;
+            case 4:
+                eliminar_viaje();
+                break;
+            case 5:
+                registrar_pasajero();
+                break;
+            case 6:
+                listar_pasajero();
+                break;
+            case 7:
+                mostrar(raiz, 0);
+                break;
+
+        }
+    } while (opc != 8);
+
+    return 0;
+}
